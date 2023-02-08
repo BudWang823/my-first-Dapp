@@ -73,13 +73,18 @@ contract Exchange {
         uint256 amount,
         uint256 balance
     );
+
     /*
         交易所内转账
         @params _token  币的地址
         @params _to     转入账号地址
         @params _amount 转账数量
-    */ 
-    function transfer(address _token, address _to, uint _amount) public {
+    */
+    function transfer(
+        address _token,
+        address _to,
+        uint256 _amount
+    ) public {
         tokens[_token][msg.sender] = tokens[_token][msg.sender].sub(_amount);
         tokens[_token][_to] = tokens[_token][_to].add(_amount);
     }
