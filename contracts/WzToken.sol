@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL - 3.0
 pragma solidity >=0.4.16 <0.9.0; // 限定solidity编译器版本
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 
 contract WzToken {
     using SafeMath for uint256; //为了uint256扩展sub  add 方法
@@ -49,7 +49,8 @@ contract WzToken {
         // _spender 交易所地址
         // msg.sender 授权账号地址
         // _value 授权所得钱数
-        require(_spender != address(0));
+        require(_spender != address(0), unicode"授权交易所地址有误");
+        require(balanceOf[msg.sender] >= _value, unicode"授权额度过大");
         allowance[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;

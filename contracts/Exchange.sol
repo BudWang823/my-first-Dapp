@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL - 3.0
 pragma solidity >=0.4.16 <0.9.0; // 限定solidity编译器版本
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/utils/math/SafeMath.sol";
 import "./WzToken.sol";
 
 contract Exchange {
@@ -20,40 +20,40 @@ contract Exchange {
     struct _Order {
         uint256 id;
         address user;
+        address tokenPay;
+        uint256 amountPay;
         address tokenGet;
         uint256 amountGet;
-        address tokenGive;
-        uint256 amountGive;
         uint256 timestamp;
     }
     // 创建订单事件
     event Order(
         uint256 id,
         address user,
+        address tokenPay,
+        uint256 amountPay,
         address tokenGet,
         uint256 amountGet,
-        address tokenGive,
-        uint256 amountGive,
         uint256 timestamp
     );
     // 取消订单事件
     event Cancel(
         uint256 id,
         address user,
+        address tokenPay,
+        uint256 amountPay,
         address tokenGet,
         uint256 amountGet,
-        address tokenGive,
-        uint256 amountGive,
         uint256 timestamp
     );
     // 完成订单事件
     event Trade(
         uint256 id,
         address user,
+        address tokenPay,
+        uint256 amountPay,
         address tokenGet,
         uint256 amountGet,
-        address tokenGive,
-        uint256 amountGive,
         uint256 timestamp
     );
     // _Order[] orders;
@@ -85,6 +85,8 @@ contract Exchange {
         address _to,
         uint256 _amount
     ) public {
+        require(_to != address(0), unicode"接受者账户地址有误");
+        require(balanceOf(_token, msg.sender) >= _amount, unicode"转账者余额不足");
         tokens[_token][msg.sender] = tokens[_token][msg.sender].sub(_amount);
         tokens[_token][_to] = tokens[_token][_to].add(_amount);
     }
@@ -131,28 +133,28 @@ contract Exchange {
     }
 
     function makeOrder(
+        address _tokenPay,
+        uint256 _tokenPayAmount,
         address _tokenGet,
-        uint256 _tokenGetAmount,
-        address _tokenGive,
-        uint256 _tokenGiveAmount
+        uint256 _tokenGetAmount
     ) public {
         orderCount = orderCount.add(1);
         orders[orderCount] = _Order(
             orderCount,
             msg.sender,
+            _tokenPay,
+            _tokenPayAmount,
             _tokenGet,
             _tokenGetAmount,
-            _tokenGive,
-            _tokenGiveAmount,
             block.timestamp
         );
         emit Order(
             orderCount,
             msg.sender,
+            _tokenPay,
+            _tokenPayAmount,
             _tokenGet,
             _tokenGetAmount,
-            _tokenGive,
-            _tokenGiveAmount,
             block.timestamp
         );
         // 发出订单事件
@@ -165,10 +167,10 @@ contract Exchange {
         emit Cancel(
             myOrder.id,
             msg.sender,
+            myOrder.tokenPay,
+            myOrder.amountPay,
             myOrder.tokenGet,
             myOrder.amountGet,
-            myOrder.tokenGive,
-            myOrder.amountGive,
             block.timestamp
         );
     }
@@ -179,7 +181,7 @@ contract Exchange {
         orderFill[_id] = true;
         // 手续费收取 && 账户余额互换
         // 手续费
-        uint256 feeAmount = myOrder.amountGet.mul(feePercent).div(100);
+        uint256 feeAmount = myOrder.amountPay.mul(feePercent).div(100);
 
         /*
             小明 makeorder
@@ -195,33 +197,33 @@ contract Exchange {
                         ETH -1
         */
         // 小明  WZT -100 - 手续费
+        tokens[myOrder.tokenPay][myOrder.user] = tokens[myOrder.tokenPay][
+            myOrder.user
+        ].sub(myOrder.amountPay.add(feeAmount));
+        // 小明  ETH + 1
         tokens[myOrder.tokenGet][myOrder.user] = tokens[myOrder.tokenGet][
             myOrder.user
-        ].sub(myOrder.amountGet.add(feeAmount));
-        // 小明  ETH + 1
-        tokens[myOrder.tokenGive][myOrder.user] = tokens[myOrder.tokenGive][
-            myOrder.user
-        ].add(myOrder.amountGive);
+        ].add(myOrder.amountGet);
         // msg.sender WZT +100
+        tokens[myOrder.tokenPay][msg.sender] = tokens[myOrder.tokenPay][
+            msg.sender
+        ].add(myOrder.amountPay);
+        // msg.sender ETH -1
         tokens[myOrder.tokenGet][msg.sender] = tokens[myOrder.tokenGet][
             msg.sender
-        ].add(myOrder.amountGet);
-        // msg.sender ETH -1
-        tokens[myOrder.tokenGive][msg.sender] = tokens[myOrder.tokenGive][
-            msg.sender
-        ].sub(myOrder.amountGive);
+        ].sub(myOrder.amountGet);
         // 手续费收取到收费账户
-        tokens[myOrder.tokenGet][feeAccount] = tokens[myOrder.tokenGet][
+        tokens[myOrder.tokenPay][feeAccount] = tokens[myOrder.tokenPay][
             feeAccount
         ].add(feeAmount);
 
         emit Trade(
             myOrder.id,
             myOrder.user,
+            myOrder.tokenPay,
+            myOrder.amountPay,
             myOrder.tokenGet,
             myOrder.amountGet,
-            myOrder.tokenGive,
-            myOrder.amountGive,
             block.timestamp
         );
     }
