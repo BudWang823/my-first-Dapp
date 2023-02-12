@@ -2,24 +2,25 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 const orderSlice = createSlice({
   name: "order",
   initialState: {
-    CancelOrders: [],
+    CancelOrder: [],
     FillOrder: [],
     AllOrder: [],
   },
   reducers: {
-    setCanOrder(state, actions) {
-      state.CancelOrders = actions.payload
+    setCancelOrder(state, actions) {
+      state.CancelOrder = actions.payload
     },
     setFillOrder(state, actions) {
       state.FillOrder = actions.payload
     },
     setAllOrder(state, actions) {
+      console.log(actions.payload)
       state.AllOrder = actions.payload
     }
   }
 })
 export const {
-  setCancelOrders,
+  setCancelOrder,
   setFillOrder,
   setAllOrder,
 } = orderSlice.actions
@@ -29,10 +30,9 @@ export const loadAllOrderData = createAsyncThunk(
   "order/fetchAllOrderData",
   async (data, { dispatch }) => {
 
-    const { web3, account, wzTokenContract, exchangeContract } = data
+    const { exchangeContract } = data
     try {
-      console.log(exchangeContract)
-      const res = await exchangeContract.getPastEvents('Order',{
+      const res = await exchangeContract.getPastEvents('Order', {
         fromBlock: 0,
         toBlock: "latest"
       })
@@ -60,6 +60,79 @@ export const loadAllOrderData = createAsyncThunk(
     } catch (err) {
 
     }
+  }
+)
 
+
+export const loadCancelOrderData = createAsyncThunk(
+  "order/fetchCancelOrderData",
+  async (data, { dispatch }) => {
+
+    const { exchangeContract } = data
+    try {
+      const res = await exchangeContract.getPastEvents('Cancel', {
+        fromBlock: 0,
+        toBlock: "latest"
+      })
+      const Cancel = res.map(item => {
+        const {
+          id,
+          timestamp,
+          user,
+          tokenPay,
+          amountPay,
+          tokenGet,
+          amountGet
+        } = item.returnValues
+        return {
+          id,
+          timestamp,
+          user,
+          tokenPay,
+          amountPay,
+          tokenGet,
+          amountGet
+        }
+      })
+      dispatch(setCancelOrder(Cancel))
+    } catch (err) {
+
+    }
+  }
+)
+
+export const loadFillOrderData = createAsyncThunk(
+  "order/fetchFillOrderData",
+  async (data, { dispatch }) => {
+    const { exchangeContract } = data
+    try {
+      const res = await exchangeContract.getPastEvents('Trade', {
+        fromBlock: 0,
+        toBlock: "latest"
+      })
+      const Fill = res.map(item => {
+        const {
+          id,
+          timestamp,
+          user,
+          tokenPay,
+          amountPay,
+          tokenGet,
+          amountGet
+        } = item.returnValues
+        return {
+          id,
+          timestamp,
+          user,
+          tokenPay,
+          amountPay,
+          tokenGet,
+          amountGet
+        }
+      })
+      dispatch(setFillOrder(Fill))
+    } catch (err) {
+
+    }
   }
 )

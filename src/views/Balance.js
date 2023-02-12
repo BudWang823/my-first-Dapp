@@ -1,8 +1,8 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { fromWei } from '../utils/util'
-import { Button, Row, Col, Card, Statistic } from "antd"
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+import {  Row, Col, Card, Statistic } from "antd"
+// import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 export default function Balance() {
   const { TokenWallet, TokenExchange, EtherWallet, EtherExchange } = useSelector(state => state.balance)
   return (

@@ -16,20 +16,282 @@ module.exports = async function (callback) {
     */
     // await preData()
 
+    await showAsset()
+
+    // await createOrder()
+
+
+
+
+
+
+
+
+
+
+
+    async function createOrder() {
+        console.log(`accounts[1]${accounts[1]} created order...`)
+        const order = await exchange.makeOrder(wztoken.address, toWei(100), ETHER_ADDRESS, toWei(0.1), {
+            from: accounts[1]
+        })
+        const orderId = order.logs[0].args.id
+        console.log(`orderId: ${orderId.toString()},  订单创建完成`)
+        await exchange.fillOrder(orderId, { from: accounts[2] })
+        console.log(`${orderId}被accounts[2]${accounts[2]}填充`)
+
+
+        // console.log(`accounts[2]${accounts[2]} created order...`)
+        // const order = await exchange.makeOrder(wztoken.address, toWei(1000), ETHER_ADDRESS, toWei(0.01), {
+        //     from: accounts[2]
+        // })
+        // const orderId = order.logs[0].args.id
+        // console.log(`orderId: ${orderId.toString()},  订单创建完成`)
+        // await await exchange.cancelOrder(orderId, { from: accounts[2] })
+        // console.log(`${orderId}被accounts[2]${accounts[2]}取消`)
+
+        await showAsset()
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     async function preData() {
         await approve(1000000)
         await saveETH(900)
-        await showAsset()
         // 交易所中 acc0 转到 acc1 500,000 WZT
-        await exchange.transfer(wztoken.address, accounts[1], toWei(500000), {
+        await exchange.transfer(wztoken.address, accounts[1], toWei(400000), {
+            from: accounts[0]
+        })
+        await exchange.transfer(wztoken.address, accounts[2], toWei(300000), {
             from: accounts[0]
         })
         // 交易所中 acc0 转到 acc2 500 ETH
         console.log(`交易所中 acc0 转到 acc1 500,000 WZT成功`)
-
-
-        console.log(fromWei(await exchange.balanceOf(ETHER_ADDRESS,accounts[0])))
-        await exchange.transfer(ETHER_ADDRESS, accounts[2], toWei(100), {
+        console.log(fromWei(await exchange.balanceOf(ETHER_ADDRESS, accounts[0])))
+        await exchange.transfer(ETHER_ADDRESS, accounts[2], toWei(300), {
+            from: accounts[0]
+        })
+        await exchange.transfer(ETHER_ADDRESS, accounts[1], toWei(300), {
             from: accounts[0]
         })
 
@@ -76,39 +338,25 @@ module.exports = async function (callback) {
                 console.log(`存到交易所${savePrice}后 当前ETH余额:`, await getETHBalance())
             }
 
-            
+
         }
     }
-    await showAsset()
-    // console.log('=-=-=-=-=-=-=-=-=-=-=-=-交易后=-=-=-=-=-=-=-=-=-=-=-=-=-=')
-    // /**
-    //  * acc1 下单  100WZT 购买 1 ETH
-    // */
-    // // await sleep()
-    const order1 = await exchange.makeOrder(wztoken.address, toWei(100), ETHER_ADDRESS, toWei(0.1), {
-        from: accounts[1]
-    })
-    const orderId = order1.logs[0].args.id
-    console.log(toWei(orderId))
-    // await exchange.fillOrder(orderId, { from: accounts[2] })
-
-
-    // await showAsset()
-
     async function showAsset() {
 
-        console.log(`=====================================交易所数据=====================================`)
+        console.log(`=====================================交易所数据start=====================================`)
         console.log("=·交易所中acc0 ETH", fromWei(await exchange.balanceOf(ETHER_ADDRESS, accounts[0])))
         console.log('=·交易所中acc0 WZT', fromWei(await exchange.balanceOf(wztoken.address, accounts[0])))
         console.log("=·交易所中acc1 ETH", fromWei(await exchange.balanceOf(ETHER_ADDRESS, accounts[1])))
         console.log('=·交易所中acc1 WZT', fromWei(await exchange.balanceOf(wztoken.address, accounts[1])))
         console.log("=·交易所中acc2 ETH", fromWei(await exchange.balanceOf(ETHER_ADDRESS, accounts[2])))
         console.log('=·交易所中acc2 WZT', fromWei(await exchange.balanceOf(wztoken.address, accounts[2])))
-        console.log(`=====================================交易所数据=====================================`)
+        console.log("=·")
+        console.log("=·")
+        console.log("=·")
+        console.log("=·")
+        console.log('=·收费账户中acc9 ETH', fromWei(await exchange.balanceOf(ETHER_ADDRESS, accounts[9])))
+        console.log('=·收费账户中acc9 WZT', fromWei(await exchange.balanceOf(wztoken.address, accounts[9])))
+        console.log(`=====================================交易所数据end=====================================`)
     }
-
-
-
-
     callback()
 } 

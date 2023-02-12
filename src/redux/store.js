@@ -8,6 +8,9 @@ const store = configureStore({
     // 订单reducer
     order: orderSlice
   },
+  middleware: getDefaultMiddleware => getDefaultMiddleware({
+    serializableCheck: false,
+  })
   // middleware:
 })
 export default store
